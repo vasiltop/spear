@@ -7,29 +7,29 @@ const app = new Hono();
 const ServerInput = z.object({
 	ip: z.string(),
 	port: z.number(),
-	name: z.string() 
+	name: z.string()
 });
 
-const Server = ServerInput.extend({last_ping: z.string().datetime()});
+const Server = ServerInput.extend({ last_ping: z.string().datetime() });
 
 type Server = z.infer<typeof Server>;
 const servers = new Map<string, Server>();
 
 app.get('/', (c) => {
 	const rows = Array.from(servers.values())
-  return c.json({data: rows});
+	return c.json({ data: rows });
 })
 
 app.post('/',
 	zValidator(
-    'json',
-		ServerInput	
-  ),
+		'json',
+		ServerInput
+	),
 	(c) => {
 		const v = c.req.valid('json');
 
 		if (servers.has(v.name)) {
-			servers.get(v.name).last_ping = Date.now();
+			servers.get(v.name)!.last_ping = Date.now();
 			console.log("Received ping from server: " + v.name);
 			return c.body(null, 201);
 		}

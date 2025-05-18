@@ -1,12 +1,15 @@
-[gd_scene format=3 uid="uid://bo1bb811htaf8"]
+[gd_scene load_steps=2 format=3 uid="uid://bo1bb811htaf8"]
 
-[node name="LoginMenu" type="Control"]
+[ext_resource type="Script" uid="uid://qnlqcm5j3pyi" path="res://menus/register/register_menu.gd" id="1_vsoiq"]
+
+[node name="RegisterMenu" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_vsoiq")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 0
@@ -15,14 +18,23 @@ offset_bottom = 40.0
 
 [node name="Username" type="LineEdit" parent="VBoxContainer"]
 layout_mode = 2
+placeholder_text = "username"
+
+[node name="Email" type="LineEdit" parent="VBoxContainer"]
+layout_mode = 2
+placeholder_text = "email"
 
 [node name="Pasword" type="LineEdit" parent="VBoxContainer"]
 layout_mode = 2
+placeholder_text = "password"
+secret = true
 
-[node name="Button" type="Button" parent="VBoxContainer"]
+[node name="Register" type="Button" parent="VBoxContainer"]
 layout_mode = 2
-text = "Login"
+text = "Register"
 
-[node name="SwitchRegister" type="Button" parent="VBoxContainer"]
+[node name="SwitchLogin" type="Button" parent="VBoxContainer"]
 layout_mode = 2
-text = "Dont have an account?"
+text = "Already have an account?"
+
+[node name="HTTPRequest" type="HTTPRequest" parent="."]
