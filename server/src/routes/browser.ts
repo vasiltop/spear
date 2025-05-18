@@ -1,6 +1,4 @@
-import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
-import { validator } from 'hono/validator'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 
@@ -49,9 +47,9 @@ app.post('/',
 	}
 )
 
-setInterval(checkServerHealth, 1000 * 1);
+setInterval(checkServerHealth, 1000 * 10); // check every 3 seconds
 
-const SERVER_HEALTH_TIMER = 1000 * 1 * 3
+const SERVER_HEALTH_TIMER = 1000 * 60 // server must be down for 1 minute
 
 function checkServerHealth() {
 	const d = Date.now();
@@ -65,9 +63,4 @@ function checkServerHealth() {
 	}
 }
 
-serve({
-  fetch: app.fetch,
-  port: 3000
-}, (info) => {
-  console.log(`Server is running on http://localhost:${info.port}`)
-})
+export default app;
