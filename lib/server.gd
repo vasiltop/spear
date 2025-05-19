@@ -1,7 +1,6 @@
 extends Node
 
 const BROWSER_PING_TIME: float = 30.0
-const PORT: int = 8000
 
 var timer: float = BROWSER_PING_TIME
 var http_request: HTTPRequest = HTTPRequest.new()
@@ -52,9 +51,9 @@ func _process(delta: float) -> void:
 		
 func ping_server_browser():
 	var data = {
-		"ip": "127.0.0.1",
-		"port": PORT,
-		"name": "LOCAL2"
+		"ip": address,
+		"port": port,
+		"name": sname
 	}
 
 	var json = JSON.stringify(data)

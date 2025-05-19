@@ -1,11 +1,22 @@
 extends CharacterBody2D
 
+@onready var pos_timer: Timer = $PosTimer
+
 @export var speed: float = 30.0
 var id: int = -1
 
 func _ready() -> void:
 	set_physics_process(is_self())
 	set_process(is_self())
+	
+	if not is_self(): return
+	
+	pos_timer.timeout.connect(
+		func():
+			Networking.player_pos.rpc(global_position.x, global_position.y)
+			pos_timer.start(pos_timer.wait_time)
+	)
+	pos_timer.start(pos_timer.wait_time)
 
 func is_self() -> bool:
 	return Networking.id() == id

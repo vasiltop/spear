@@ -8,6 +8,7 @@ const SESSION_ID_FILE: String = "user://session.dat"
 var session_id: String = ""
 
 var players = {
+# example:
 #	-1: {
 #		"session_id": -1,
 #		"node": null
@@ -33,7 +34,7 @@ func spawn_player(id: int):
 		"session_id": -1, # only known by the server
 		"node": null
 	}
-	
+
 	player_connected.emit(id)
 
 func id():
@@ -47,3 +48,7 @@ func transfer_session_id(session_id: String):
 	if not is_server(): return
 	var sender = multiplayer.get_remote_sender_id()
 	players[sender]["session_id"] = session_id
+
+@rpc("any_peer", "call_remote", "unreliable")
+func player_pos(x: float, y: float):
+	players[multiplayer.get_remote_sender_id()]["node"].global_position = Vector2(x, y)
