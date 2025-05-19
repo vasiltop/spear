@@ -7,10 +7,13 @@ extends Control
 @onready var http_request: HTTPRequest = $HTTPRequest
 
 func _ready() -> void:
-	if FileAccess.file_exists(Global.SESSION_ID_FILE):
-		var file = FileAccess.open(Global.SESSION_ID_FILE, FileAccess.READ)
+	var args = Array(OS.get_cmdline_args())
+	if len(args) > 1: return
+	
+	if FileAccess.file_exists(Networking.SESSION_ID_FILE):
+		var file = FileAccess.open(Networking.SESSION_ID_FILE, FileAccess.READ)
 		var content = file.get_as_text()
-		Global.session_id = content
+		Networking.session_id = content
 		get_tree().change_scene_to_file("res://menus/main/main_menu.tscn")
 	
 	login_btn.pressed.connect(login)
@@ -20,10 +23,10 @@ func _ready() -> void:
 func request_completed(result, response_code, headers, body):
 	if response_code != 200: return
 	var json = JSON.parse_string(body.get_string_from_utf8())
-	var file = FileAccess.open(Global.SESSION_ID_FILE, FileAccess.WRITE)
+	var file = FileAccess.open(Networking.SESSION_ID_FILE, FileAccess.WRITE)
 	var id = json["session_id"]
 	file.store_string(id)
-	Global.session_id = id
+	Networking.session_id = id
 	get_tree().change_scene_to_file("res://menus/main/main_menu.tscn")
 
 func login():
@@ -34,4 +37,4 @@ func login():
 	
 	var json = JSON.stringify(data)
 	var headers = ["Content-Type: application/json"]
-	http_request.request(Global.URL + "/auth/login", headers, HTTPClient.METHOD_POST, json)
+	http_request.request(Networking.API_URL + "/auth/login", headers, HTTPClient.METHOD_POST, json)

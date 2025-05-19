@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://ck56sdkv8ptb2"]
+
+[ext_resource type="Script" uid="uid://cxshpee6b1v68" path="res://levels/hub/hub.gd" id="1_wwckl"]
+
+[node name="Hub" type="Node2D"]
+script = ExtResource("1_wwckl")
+
+[node name="Players" type="Node" parent="."]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(1.75, 1.75)

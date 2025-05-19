@@ -33,3 +33,11 @@ offset_top = 176.0
 offset_right = 180.0
 offset_bottom = 207.0
 text = "Play"
+
+[node name="Refresh" type="Button" parent="."]
+layout_mode = 0
+offset_left = 268.0
+offset_top = 86.0
+offset_right = 336.0
+offset_bottom = 117.0
+text = "Refresh"
