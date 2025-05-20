@@ -3,7 +3,6 @@ extends Node
 const BROWSER_PING_TIME: float = 30.0
 
 var timer: float = BROWSER_PING_TIME
-var http_request: HTTPRequest = HTTPRequest.new()
 
 var address: String
 var port: int
@@ -18,7 +17,6 @@ enum ServerType {
 var type: ServerType
 
 func _ready() -> void:
-	add_child(http_request)
 	var args = Array(OS.get_cmdline_args())
 	set_process(false)
 	
@@ -50,12 +48,10 @@ func _process(delta: float) -> void:
 		ping_server_browser()
 		
 func ping_server_browser():
-	var data = {
-		"ip": address,
-		"port": port,
-		"name": sname
-	}
-
-	var json = JSON.stringify(data)
-	var headers = ["Content-Type: application/json"]
-	http_request.request(Networking.API_URL + "/browser", headers, HTTPClient.METHOD_POST, json)
+	await (Networking.http
+		.http_post("/browser")
+		.json({
+			"ip": address,
+			"port": port,
+			"name": sname
+		}).send())
