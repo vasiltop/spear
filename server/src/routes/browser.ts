@@ -10,7 +10,7 @@ const ServerInput = z.object({
 	name: z.string()
 });
 
-const Server = ServerInput.extend({ last_ping: z.string().datetime() });
+const Server = ServerInput.extend({ last_ping: z.coerce.date() });
 
 type Server = z.infer<typeof Server>;
 const servers = new Map<string, Server>();
@@ -29,7 +29,7 @@ app.post('/',
 		const v = c.req.valid('json');
 
 		if (servers.has(v.name)) {
-			servers.get(v.name)!.last_ping = Date.now();
+			servers.get(v.name)!.last_ping = new Date();
 			console.log("Received ping from server: " + v.name);
 			return c.body(null, 201);
 		}
@@ -38,7 +38,7 @@ app.post('/',
 			ip: v.ip,
 			port: v.port,
 			name: v.name,
-			last_ping: Date.now(),
+			last_ping: new Date(),
 		}
 
 		console.log("Adding server: " + v.name);
@@ -56,7 +56,7 @@ function checkServerHealth() {
 	const latest = d - SERVER_HEALTH_TIMER;
 
 	for (const [name, server] of servers) {
-		if (server.last_ping < latest) {
+		if (server.last_ping.getTime() < latest) {
 			servers.delete(name);
 			console.log("Removed server: " + name);
 		}

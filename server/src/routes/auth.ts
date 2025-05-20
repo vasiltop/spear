@@ -68,8 +68,8 @@ app.post('/login',
 		try {
 			if (await argon2.verify(user.password, v.password)) {
 				const [session] = await db.insert(sessions).values({
-					userId: user.id,
-					expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // one year
+					user_id: user.id,
+					expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // one year
 				}).returning({ id: sessions.id });
 
 				setCookie(c, 'sessionId', session.id)

@@ -5,6 +5,7 @@ signal player_connected(id: int)
 const API_URL: String = "http://localhost:3000"
 const SESSION_ID_FILE: String = "user://session.dat"
 
+@onready var http: BetterHTTPClient = BetterHTTPClient.new(self, BetterHTTPURL.parse(API_URL))
 var session_id: String = ""
 
 var players = {
@@ -14,6 +15,8 @@ var players = {
 #		"node": null
 #	}
 }
+
+var profile_id = null
 
 func _ready() -> void:
 	multiplayer.peer_connected.connect(peer_connected)
