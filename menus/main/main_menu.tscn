@@ -11,70 +11,93 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_5je1j")
 
-[node name="Logout" type="Button" parent="."]
-layout_mode = 0
-offset_right = 8.0
-offset_bottom = 8.0
+[node name="FooterMainSplit" type="VSplitContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+dragger_visibility = 2
+
+[node name="Main" type="MarginContainer" parent="FooterMainSplit"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/margin_left = 50
+theme_override_constants/margin_top = 50
+theme_override_constants/margin_right = 50
+theme_override_constants/margin_bottom = 50
+
+[node name="VSplitContainer" type="VSplitContainer" parent="FooterMainSplit/Main"]
+layout_mode = 2
+dragger_visibility = 2
+
+[node name="Label" type="Label" parent="FooterMainSplit/Main/VSplitContainer"]
+layout_mode = 2
+text = "Class Select:"
+
+[node name="ClassSelector" type="HBoxContainer" parent="FooterMainSplit/Main/VSplitContainer"]
+layout_mode = 2
+theme_override_constants/separation = 30
+
+[node name="Classes" type="HBoxContainer" parent="FooterMainSplit/Main/VSplitContainer/ClassSelector"]
+layout_mode = 2
+theme_override_constants/separation = 30
+
+[node name="CreateClass" type="Button" parent="FooterMainSplit/Main/VSplitContainer/ClassSelector"]
+custom_minimum_size = Vector2(100, 300)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 86
+text = "+"
+
+[node name="Control" type="HBoxContainer" parent="FooterMainSplit"]
+layout_mode = 2
+
+[node name="Logout" type="Button" parent="FooterMainSplit/Control"]
+layout_mode = 2
 text = "Logout"
 
-[node name="ServerSelector" type="OptionButton" parent="."]
-layout_mode = 0
-offset_left = 4.0
-offset_top = 38.0
-offset_right = 134.0
-offset_bottom = 107.0
+[node name="ServerSelector" type="OptionButton" parent="FooterMainSplit/Control"]
+layout_mode = 2
+selected = 0
+item_count = 2
+popup/item_0/text = "NA #1"
+popup/item_0/id = 0
+popup/item_1/text = "NA #2"
+popup/item_1/id = 1
 
-[node name="HTTPRequest" type="HTTPRequest" parent="."]
+[node name="Refresh" type="Button" parent="FooterMainSplit/Control"]
+layout_mode = 2
+text = "↺"
 
-[node name="Play" type="Button" parent="."]
-layout_mode = 0
-offset_left = 85.0
-offset_top = 112.0
-offset_right = 126.0
-offset_bottom = 143.0
+[node name="Play" type="Button" parent="FooterMainSplit/Control"]
+layout_mode = 2
 text = "Play"
 
-[node name="Refresh" type="Button" parent="."]
-layout_mode = 0
-offset_left = 10.0
-offset_top = 112.0
-offset_right = 78.0
-offset_bottom = 143.0
-text = "Refresh"
+[node name="ClassCreator" type="CenterContainer" parent="."]
+z_index = 10
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="Classes" type="Control" parent="."]
-anchors_preset = 0
-offset_left = -18.0
-offset_top = -144.0
-offset_right = 22.0
-offset_bottom = -104.0
+[node name="Form" type="VBoxContainer" parent="ClassCreator"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
 
-[node name="Label" type="Label" parent="Classes"]
-layout_mode = 0
-offset_left = 269.0
-offset_top = 278.0
-offset_right = 326.0
-offset_bottom = 301.0
-text = "Classes"
+[node name="Back" type="Button" parent="ClassCreator/Form"]
+layout_mode = 2
+text = "Back"
 
-[node name="Classes" type="HBoxContainer" parent="Classes"]
-layout_mode = 0
-offset_left = 278.0
-offset_top = 313.0
-offset_right = 1030.0
-offset_bottom = 367.0
+[node name="Name" type="LineEdit" parent="ClassCreator/Form"]
+layout_mode = 2
+placeholder_text = "name"
 
-[node name="Creator" type="Control" parent="Classes"]
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="OptionButton" type="OptionButton" parent="Classes/Creator"]
-layout_mode = 0
-offset_left = 67.0
-offset_top = 451.0
-offset_right = 99.0
-offset_bottom = 471.0
+[node name="Class" type="OptionButton" parent="ClassCreator/Form"]
+layout_mode = 2
 selected = 0
 item_count = 5
 popup/item_0/text = "warrior"
@@ -88,18 +111,6 @@ popup/item_3/id = 3
 popup/item_4/text = "rogue"
 popup/item_4/id = 4
 
-[node name="Name" type="LineEdit" parent="Classes/Creator"]
-layout_mode = 0
-offset_left = 68.0
-offset_top = 490.0
-offset_right = 175.0
-offset_bottom = 521.0
-placeholder_text = "name"
-
-[node name="Create" type="Button" parent="Classes/Creator"]
-layout_mode = 0
-offset_left = 69.0
-offset_top = 528.0
-offset_right = 126.0
-offset_bottom = 559.0
-text = "create"
+[node name="Create" type="Button" parent="ClassCreator/Form"]
+layout_mode = 2
+text = "Create"

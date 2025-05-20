@@ -13,7 +13,8 @@ script = ExtResource("1_tc4ot")
 [node name="Select" type="Button" parent="."]
 layout_mode = 2
 text = "Character name: name
-Level 0 Warrior"
+Level 0 Warrior
+Selected"
 
 [node name="Delete" type="Button" parent="."]
 layout_mode = 2
