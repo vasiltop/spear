@@ -19,3 +19,10 @@ shape = SubResource("RectangleShape2D_abrql")
 
 [node name="PosTimer" type="Timer" parent="."]
 wait_time = 0.04
+
+[node name="Name" type="Label" parent="."]
+offset_left = -15.0
+offset_top = -31.0
+offset_right = 25.0
+offset_bottom = -8.0
+text = "test"

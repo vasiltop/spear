@@ -1,9 +1,12 @@
 extends CharacterBody2D
 
 @onready var pos_timer: Timer = $PosTimer
-
 @export var speed: float = 30.0
+
 var id: int = -1
+var health: float = 0.0
+var pclass: Class.Class = Class.Class.WARRIOR
+var pname: String = "Player Name"
 
 func _ready() -> void:
 	set_physics_process(is_self())

@@ -67,7 +67,16 @@ func transfer_ids(user_id: String, session_id: String, profile_id: String):
 		return
 		
 	var profile = (await resp.json())["data"]
-	print(profile)
+	init_player.rpc(sender, Class.from_str(profile["class"]), profile["name"], profile["health"])
+	
+@rpc("authority", "call_local", "reliable")
+func init_player(id: int, pclass: Class.Class, pname: String, health: int):
+	var n = players[id].node
+	
+	n.pclass = pclass
+	n.pname = pname
+	n.health = health
+	n.get_node("Name").text = pname
 
 @rpc("any_peer", "call_remote", "unreliable")
 func player_pos(x: float, y: float):

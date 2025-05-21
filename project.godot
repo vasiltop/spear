@@ -20,6 +20,7 @@ config/icon="res://icon.svg"
 Networking="*res://lib/networking.gd"
 Server="*res://lib/server.gd"
 Client="*res://lib/client.gd"
+Class="*res://lib/class.gd"
 
 [input]
 
