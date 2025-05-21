@@ -8,7 +8,7 @@ const app = new Hono();
 
 app.route('/browser', browser);
 app.route('/auth', auth);
-app.route('/class', classes);
+app.route('/profile', classes);
 
 serve({
   fetch: app.fetch,

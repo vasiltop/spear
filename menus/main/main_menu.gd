@@ -56,7 +56,7 @@ func create_class():
 	var cname = class_creator_class_input.get_item_text(class_creator_class_input.selected)
 	
 	var resp = await (Networking.http
-		.http_post("/class")
+		.http_post("/profile")
 		.header("session-id", Networking.session_id)
 		.json({
 			"name": n,
@@ -75,11 +75,7 @@ func update_create_class_btn_visibility():
 	create_class_btn.visible = classes_container.get_child_count() < 3
 		
 func get_classes():
-	var resp = await (Networking.http
-		.http_get("/class")
-		.header("session-id", Networking.session_id)
-		.send())
-	
+	var resp = await (Networking.http.http_get("/profile/" + Networking.user_id).send())
 	if resp.status() != 200:
 		return
 		
@@ -126,7 +122,6 @@ func play():
 	get_tree().change_scene_to_file("res://levels/hub/hub.tscn")
 	var server = servers[server_selector.selected]
 	Client.connect_to_server(server["ip"], server["port"])
-
 
 func logout():
 	DirAccess.remove_absolute(Networking.SESSION_ID_FILE)

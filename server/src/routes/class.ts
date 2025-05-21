@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import { auth } from '../middleware.ts';
 import db from '../db/index.ts';
-import { count, eq } from 'drizzle-orm';
+import { count, eq, and } from 'drizzle-orm';
 import { type ProfileId, profiles, type UserId } from '../db/schema.ts';
 
 type Variables = {
@@ -56,8 +56,8 @@ app.post('/',
     }
 );
 
-app.get('/', auth, async (c, next) => {
-    const user_id = c.get('user_id');
+app.get('/:id', async (c, next) => {
+    const user_id = c.req.param('id');
 
     const data = await db.select()
         .from(profiles)
@@ -68,8 +68,23 @@ app.get('/', auth, async (c, next) => {
     });
 });
 
+app.get('/:user_id/:id', async (c, next) => {
+    const user_id = c.req.param('user_id');
+    const profile_id = c.req.param('id');
+
+    const data = await db.select().from(profiles)
+        .where(and(eq(profiles.user_id, user_id as UserId), eq(profiles.id, profile_id as ProfileId)));
+
+    if (data.length === 0) {
+        return c.body(null, 404);
+    }
+
+    return c.json({
+        data: data[0]
+    });
+});
+
 app.delete('/:id', auth, async (c, next) => {
-    const user_id = c.get('user_id');
     const id = c.req.param('id');
 
     await db.delete(profiles).where(eq(profiles.id, id as ProfileId));

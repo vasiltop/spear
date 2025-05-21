@@ -7,8 +7,13 @@ import { zValidator } from '@hono/zod-validator'
 import { sessions, users } from '../db/schema.ts'
 import { eq } from 'drizzle-orm';
 import pg from "pg";
+import { auth } from '../middleware.ts';
 
-const app = new Hono();
+type Variables = {
+  user_id: string
+}
+
+const app = new Hono<{ Variables: Variables }>();
 
 const RegisterInput = z.object({
 	email: z.string(),
@@ -85,6 +90,12 @@ app.post('/login',
 		}
 	}
 );
+
+app.get('/me', auth, async (c) => {
+	return c.json({
+		user_id: c.get('user_id'),
+	});
+});
 
 
 export default app;

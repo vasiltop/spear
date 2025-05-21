@@ -3,7 +3,6 @@ extends Node
 const BROWSER_PING_TIME: float = 30.0
 
 var timer: float = BROWSER_PING_TIME
-
 var address: String
 var port: int
 var sname: String

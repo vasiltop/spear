@@ -4,7 +4,7 @@ func _ready() -> void:
 	Networking.multiplayer.connected_to_server.connect(connected_to_server)
 
 func connected_to_server():
-	Networking.transfer_session_id.rpc_id(1, Networking.session_id)
+	Networking.transfer_ids.rpc_id(1, Networking.user_id, Networking.session_id, Networking.profile_id)
 	Networking.spawn_player(Networking.id())
 	
 func connect_to_server(ip, port):

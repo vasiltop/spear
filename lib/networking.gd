@@ -6,17 +6,20 @@ const API_URL: String = "http://localhost:3000"
 const SESSION_ID_FILE: String = "user://session.dat"
 
 @onready var http: BetterHTTPClient = BetterHTTPClient.new(self, BetterHTTPURL.parse(API_URL))
+
 var session_id: String = ""
+var user_id: String = ""
+var profile_id = null
 
 var players = {
 # example:
 #	-1: {
-#		"session_id": -1,
-#		"node": null
+#		"session_id": "",
+#		"profile_id": "",
+#		"node": null,
+#		"init": false
 #	}
 }
-
-var profile_id = null
 
 func _ready() -> void:
 	multiplayer.peer_connected.connect(peer_connected)
@@ -34,8 +37,10 @@ func peer_connected(id: int):
 @rpc("authority", "call_local", "reliable")
 func spawn_player(id: int):
 	players[id] = {
-		"session_id": -1, # only known by the server
-		"node": null
+		"session_id": "", # only known by the server
+		"profile_id": "",
+		"node": null,
+		"init": false
 	}
 
 	player_connected.emit(id)
@@ -47,11 +52,24 @@ func is_server():
 	return multiplayer.is_server()
 	
 @rpc("any_peer", "call_remote", "reliable")
-func transfer_session_id(session_id: String):
+func transfer_ids(user_id: String, session_id: String, profile_id: String):
 	if not is_server(): return
 	var sender = multiplayer.get_remote_sender_id()
 	players[sender]["session_id"] = session_id
+	players[sender]["profile_id"] = profile_id
+	players[sender]["init"] = true
+	
+	var resp = await (Networking.http
+		.http_get("/profile/" + user_id + "/" + profile_id)
+		.send())
+	
+	if resp.status() != 200:
+		return
+		
+	var profile = (await resp.json())["data"]
+	print(profile)
 
 @rpc("any_peer", "call_remote", "unreliable")
 func player_pos(x: float, y: float):
+	var sender = multiplayer.get_remote_sender_id()
 	players[multiplayer.get_remote_sender_id()]["node"].global_position = Vector2(x, y)

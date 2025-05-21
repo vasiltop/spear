@@ -24,10 +24,11 @@ func _process(delta: float) -> void:
 
 func delete():
 	var resp = await (Networking.http
-		.http_delete("/class/" + id)
+		.http_delete("/profile/" + id)
 		.header("session-id", Networking.session_id)
 		.send())
 	
+	print(resp.status())
 	if resp.status() != 204: return
 	
 	deleted.emit(id)
