@@ -33,6 +33,9 @@ func peer_connected(id: int):
 		for pid in players: # let the new player know about everyone except himself
 			if pid != id:
 				spawn_player.rpc_id(id, pid)
+				if players[pid]["init"]:
+					var n = players[pid]["node"]
+					init_player.rpc_id(id, pid, n.pclass, n.pname, n.health)
 
 @rpc("authority", "call_local", "reliable")
 func spawn_player(id: int):
