@@ -17,7 +17,8 @@ var players = {
 #		"session_id": "",
 #		"profile_id": "",
 #		"node": null,
-#		"init": false
+#		"init": false,
+#		"last_updated_pos": 0
 #	}
 }
 
@@ -36,17 +37,6 @@ func peer_connected(id: int):
 				if players[pid]["init"]:
 					var n = players[pid]["node"]
 					init_player.rpc_id(id, pid, n.pclass, n.pname, n.health)
-
-@rpc("authority", "call_local", "reliable")
-func spawn_player(id: int):
-	players[id] = {
-		"session_id": "", # only known by the server
-		"profile_id": "",
-		"node": null,
-		"init": false
-	}
-
-	player_connected.emit(id)
 
 func id():
 	return multiplayer.get_unique_id()
@@ -75,13 +65,49 @@ func transfer_ids(user_id: String, session_id: String, profile_id: String):
 @rpc("authority", "call_local", "reliable")
 func init_player(id: int, pclass: Class.Class, pname: String, health: int):
 	var n = players[id].node
-	
 	n.pclass = pclass
 	n.pname = pname
 	n.health = health
 	n.get_node("Name").text = pname
 
 @rpc("any_peer", "call_remote", "unreliable")
-func player_pos(x: float, y: float):
+func try_player_pos(pos: Vector2):
+	if not is_server(): return
+	
 	var sender = multiplayer.get_remote_sender_id()
-	players[multiplayer.get_remote_sender_id()]["node"].global_position = Vector2(x, y)
+	var current_time = Time.get_ticks_msec()
+	var last_sent_time = players[sender].last_updated_pos
+	
+	var elapsed = (current_time - last_sent_time) / 1000.0 # convert to seconds
+	
+	var old_pos = players[sender].node.global_position
+	var spd = players[sender].node.speed
+	
+	var max_allowed_distance = spd * elapsed / 60.0 * 2
+	var distance = pos.distance_to(old_pos)
+
+	players[sender].last_updated_pos = current_time
+	
+	if distance > max_allowed_distance:
+		print("Invalid position packed sent by: %d\n The players speed was %d, covering a distance of %f.\n While his max should be %f." % [sender, spd, distance, max_allowed_distance])
+		player_pos.rpc(sender, old_pos, true)
+		return
+	
+	player_pos.rpc(sender, pos, false)
+
+@rpc("authority", "call_local", "unreliable")
+func player_pos(id: int, pos: Vector2, fix: bool):
+	if id == id() and not fix: return
+	players[id]["node"].global_position = pos
+
+@rpc("authority", "call_local", "reliable")
+func spawn_player(id: int):
+	players[id] = {
+		"session_id": "", # only known by the server
+		"profile_id": "",
+		"node": null,
+		"init": false,
+		"last_updated_pos": Time.get_ticks_msec()
+	}
+
+	player_connected.emit(id)
