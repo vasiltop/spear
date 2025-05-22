@@ -22,6 +22,8 @@ var players = {
 #	}
 }
 
+var party
+
 func _ready() -> void:
 	multiplayer.peer_connected.connect(peer_connected)
 	
