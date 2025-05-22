@@ -1,12 +1,15 @@
-extends HSplitContainer
+extends HBoxContainer
 
 const UI_PLAYER = preload("res://entities/player/ui/ui_player.tscn")
 
+@onready var player: CharacterBody2D = $"../../.."
 @onready var all_players_container: GridContainer = $AllPlayers/Players
+
+func _ready() -> void:
+	set_process(player.is_self())
 
 func _process(delta: float) -> void:
 	if all_players_container.get_child_count() != Networking.players.size() - 1:
-		print(all_players_container.get_child_count(), Networking.players.size())
 		reset()
 		
 func reset():

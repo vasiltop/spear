@@ -1,6 +1,7 @@
 extends Node
 
 signal player_connected(id: int)
+signal on_chat(id: int, message: String)
 
 const API_URL: String = "http://localhost:3000"
 const SESSION_ID_FILE: String = "user://session.dat"
@@ -22,7 +23,9 @@ var players = {
 #	}
 }
 
-var party
+var parties = {
+	
+}
 
 func _ready() -> void:
 	multiplayer.peer_connected.connect(peer_connected)
@@ -113,3 +116,11 @@ func spawn_player(id: int):
 	}
 
 	player_connected.emit(id)
+
+@rpc("any_peer", "call_local", "reliable")
+func chat(message: String):
+	var pid = multiplayer.get_remote_sender_id()
+	on_chat.emit(pid, message)
+
+func player_name(pid: int):
+	return players[pid].node.pname

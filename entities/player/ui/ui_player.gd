@@ -5,6 +5,4 @@ var id: int = 0
 
 func _process(delta: float) -> void:
 	if id == 0: return
-	
-	#print(Networking.players[id].node.pname)
 	name_label.text = Networking.players[id].node.pname

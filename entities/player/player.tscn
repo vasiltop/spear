@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=3 uid="uid://bwyod1uuhc1pi"]
+[gd_scene load_steps=6 format=3 uid="uid://bwyod1uuhc1pi"]
 
 [ext_resource type="Script" uid="uid://7238sneyds6s" path="res://entities/player/player.gd" id="1_abrql"]
 [ext_resource type="Texture2D" uid="uid://dhf5uxpj2ycnf" path="res://icon.svg" id="1_symyc"]
 [ext_resource type="Script" uid="uid://hhg07km8ulls" path="res://entities/player/party.gd" id="3_sglur"]
+[ext_resource type="Script" uid="uid://bf7guv3t0r6rv" path="res://entities/player/ui/chat.gd" id="4_bls4j"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_abrql"]
 
@@ -41,9 +42,8 @@ grow_horizontal = 2
 grow_vertical = 2
 current_tab = 0
 
-[node name="Party" type="HSplitContainer" parent="UI/TabBar"]
+[node name="Party" type="HBoxContainer" parent="UI/TabBar"]
 layout_mode = 2
-dragger_visibility = 2
 script = ExtResource("3_sglur")
 metadata/_tab_index = 0
 
@@ -57,6 +57,10 @@ text = "My Party"
 
 [node name="Players" type="VBoxContainer" parent="UI/TabBar/Party/MyParty"]
 layout_mode = 2
+
+[node name="VSeparator" type="VSeparator" parent="UI/TabBar/Party"]
+layout_mode = 2
+theme_override_constants/separation = 10
 
 [node name="AllPlayers" type="VSplitContainer" parent="UI/TabBar/Party"]
 layout_mode = 2
@@ -73,3 +77,26 @@ layout_mode = 2
 visible = false
 layout_mode = 2
 metadata/_tab_index = 1
+
+[node name="Chat" type="VSplitContainer" parent="UI"]
+custom_minimum_size = Vector2(250, 0)
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -40.0
+offset_right = 40.0
+grow_vertical = 0
+dragger_visibility = 2
+script = ExtResource("4_bls4j")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="UI/Chat"]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="Messages" type="VBoxContainer" parent="UI/Chat/ScrollContainer"]
+layout_mode = 2
+
+[node name="Message" type="LineEdit" parent="UI/Chat"]
+layout_mode = 2
+placeholder_text = "press \"/\" to chat"
