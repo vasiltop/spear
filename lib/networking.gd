@@ -47,15 +47,19 @@ class Party:
 	func remove(pid: int) -> void:
 		var idx = members.find(pid)
 		members.remove_at(idx)
+		self.leader = self.members[0]
 	
 	func full() -> bool:
-		return len(self.members) >= MAX_PARTY_SIZE
+		return self.size() >= MAX_PARTY_SIZE
 		
 	func has(pid: int) -> bool:
 		for id in self.members:
 			if id == pid: return true
 
 		return false
+		
+	func size() -> int:
+		return len(self.members)
 
 var parties: Dictionary = {
 	# id -> Party
@@ -154,8 +158,6 @@ func spawn_player(id: int, party_id: int):
 	
 	parties[party_id] = Party.new(id)
 	
-	print(parties)
-	print(id())
 	player_connected.emit(id)
 
 @rpc("any_peer", "call_local", "reliable")
@@ -173,7 +175,7 @@ func try_accept_invite(player_inviting: int):
 	if not is_server(): return
 	
 	var sender = multiplayer.get_remote_sender_id()
-	var party_id: int = player_party(player_inviting)
+	var party_id: int = player_party_id(player_inviting)
 	var party: Party = parties[party_id]
 	
 	if not party.full():
@@ -182,13 +184,19 @@ func try_accept_invite(player_inviting: int):
 @rpc("authority", "call_local", "reliable")
 func join_party(party_id: int, pid: int):
 	var party: Party = parties[party_id]
+	
+	var old_party_id: int = player_party_id(pid)
+	var old_party: Party = parties[old_party_id]
+	
+	if old_party.size() == 1:
+		parties.erase(old_party_id)
+	else:
+		old_party.remove(pid)
+		
 	party.add(pid)
 	players[pid].party_id = party_id
 	party_updated.emit(party_id)
 	
-	print(party.members)
-	print("my id %d" % id())
-
 func player_name(pid: int):
 	return players[pid].node.pname
 
@@ -196,11 +204,11 @@ func next_party_id() -> int:
 	current_party_id_counter += 1
 	return current_party_id_counter
 
-func player_party(pid: int) -> int:
+func player_party_id(pid: int) -> int:
 	return players[pid].party_id
 
 func my_party_id() -> int:
-	return player_party(id())
+	return player_party_id(id())
 
 func my_party() -> Party:
 	return parties[my_party_id()]
