@@ -1,15 +1,19 @@
 extends VSplitContainer
 
+const INVITE_CHAT = preload("res://entities/player/ui/invite_chat.tscn")
+
 @onready var message_input: LineEdit = $Message
 @onready var messages_container: VBoxContainer = $ScrollContainer/Messages
 
-#	{
-#		"name":
-#		"message":
-#	}
-
 func _ready() -> void:
 	Networking.on_chat.connect(on_chat)
+	Networking.invite_from.connect(invite_from)
+	
+func invite_from(pid: int):
+	var inst = INVITE_CHAT.instantiate()
+	messages_container.add_child(inst)
+	inst.get_node("Message").text = "SYSTEM: Invite from %s" % Networking.player_name(pid)
+	inst.get_node("Button").pressed.connect(func(): Networking.accept_invite.rpc_id(0, pid))
 	
 func on_chat(pid: int, message: String):
 	var pname = Networking.player_name(pid)
@@ -19,14 +23,13 @@ func on_chat(pid: int, message: String):
 
 func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("chat"):
-		if is_chatting():
-			message_input.release_focus()
-		else:
+		if not is_chatting():
 			message_input.grab_focus()
 			
 	if Input.is_action_just_pressed("chat_send") and is_chatting():
-		send(message_input.text)
-		message_input.clear()
+		if message_input.text != "":
+			send(message_input.text)
+			message_input.clear()
 		message_input.release_focus()
 
 func send(message: String):

@@ -1,7 +1,9 @@
 extends Node
 
-signal player_connected(id: int)
-signal on_chat(id: int, message: String)
+signal player_connected(pid: int)
+signal on_chat(pid: int, message: String)
+signal invite_from(pid: int)
+signal party_updated()
 
 const API_URL: String = "http://localhost:3000"
 const SESSION_ID_FILE: String = "user://session.dat"
@@ -11,6 +13,7 @@ const SESSION_ID_FILE: String = "user://session.dat"
 var session_id: String = ""
 var user_id: String = ""
 var profile_id = null
+var current_party_id_counter = 0
 
 var players = {
 # example:
@@ -20,12 +23,11 @@ var players = {
 #		"node": null,
 #		"init": false,
 #		"last_updated_pos": 0
+#   "party_id": 0
 #	}
 }
 
-var parties = {
-	
-}
+var party = []
 
 func _ready() -> void:
 	multiplayer.peer_connected.connect(peer_connected)
@@ -112,7 +114,8 @@ func spawn_player(id: int):
 		"profile_id": "",
 		"node": null,
 		"init": false,
-		"last_updated_pos": Time.get_ticks_msec()
+		"last_updated_pos": Time.get_ticks_msec(),
+		"party_id": next_party_id()
 	}
 
 	player_connected.emit(id)
@@ -122,5 +125,53 @@ func chat(message: String):
 	var pid = multiplayer.get_remote_sender_id()
 	on_chat.emit(pid, message)
 
+@rpc("any_peer", "call_remote", "reliable")
+func invite():
+	var pid = multiplayer.get_remote_sender_id()
+	invite_from.emit(pid)
+
+@rpc("any_peer", "call_remote", "reliable")
+func accept_invite(pid: int):
+	if not is_server(): return
+	
+	var sender = multiplayer.get_remote_sender_id()
+	var party_id = player_party(pid)
+	
+	if get_party_size(party_id) >= 3:
+		print("Invalid invite, party size was too large: %d" % get_party_size(party_id))
+		return
+
+	players[sender].party_id = party_id
+	print("%d accepted invite from %d" % [pid, sender])
+	
+	var p = get_party(party_id)
+	for id in p:
+		update_party.rpc_id(id, p)
+	
+@rpc("authority", "call_remote", "reliable")
+func update_party(players: Array[int]) -> void:
+	party = players
+	party_updated.emit()
+	print("received party update")
+
 func player_name(pid: int):
 	return players[pid].node.pname
+
+func next_party_id() -> int:
+	current_party_id_counter += 1
+	return current_party_id_counter
+
+func get_party(party_id: int) -> Array[int]:
+	var res: Array[int] = []
+	
+	for pid in players:
+		if players[pid].party_id == party_id:
+			res.append(pid)
+			
+	return res
+
+func get_party_size(party_id: int) -> int:
+	return get_party(party_id).size()
+	
+func player_party(pid: int) -> int:
+	return players[pid].party_id
