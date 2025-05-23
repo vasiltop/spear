@@ -7,9 +7,11 @@ const UI_PLAYER = preload("res://entities/player/ui/ui_player.tscn")
 @onready var party_container: VBoxContainer = $MyParty/Players
 
 func _ready() -> void:
-	set_process(player.is_self())
-	Networking.party_updated.connect(reset)
+	if not player.is_self(): return
+	
+	Networking.party_updated.connect(func(id: int): reset())
 	Networking.player_connected.connect(func(id: int): reset())
+	reset()
 		
 func reset():
 	for n in all_players_container.get_children():
@@ -21,8 +23,7 @@ func reset():
 	for id in Networking.players:
 		var inst = UI_PLAYER.instantiate()
 		inst.id = id
-		print(id in Networking.party)
-		if id == Networking.id() or (id in Networking.party):
+		if id == Networking.id() or Networking.my_party().has(id):
 			party_container.add_child(inst)
 		else:
 			all_players_container.add_child(inst)
