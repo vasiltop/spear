@@ -23,7 +23,7 @@ offset_left = -15.0
 offset_top = -31.0
 offset_right = 25.0
 offset_bottom = -8.0
-text = "test"
+text = "PLAYER_NAME"
 
 [node name="UI" type="CanvasLayer" parent="."]
 

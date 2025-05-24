@@ -71,6 +71,7 @@ var parties: Dictionary = {
 
 func _ready() -> void:
 	multiplayer.peer_connected.connect(peer_connected)
+	multiplayer.peer_disconnected.connect(peer_disconnected)
 	
 func peer_connected(id: int):
 	print(id(), ": Connected to peer ", id)
@@ -85,6 +86,22 @@ func peer_connected(id: int):
 				if players[pid]["init"]:
 					var n = players[pid]["node"]
 					init_player.rpc_id(id, pid, n.pclass, n.pname, n.health)
+
+func peer_disconnected(id: int):
+	if id == 1: return
+	print(id(), ": Disconnected from peer ", id)
+	
+	var party_id: int = player_party_id(id)
+	var party: Party = parties[party_id]
+	
+	if party.size() == 1:
+		parties.erase(party_id)
+	else:
+		party.remove(id)
+	
+	players[id].node.queue_free()
+	players.erase(id)
+	players_modified.emit()
 
 func id():
 	return multiplayer.get_unique_id()
@@ -112,7 +129,11 @@ func transfer_ids(user_id: String, session_id: String, profile_id: String):
 	
 @rpc("authority", "call_local", "reliable")
 func init_player(id: int, pclass: Class.Class, pname: String, health: int):
+	var my_id = id()
 	var n = players[id].node
+	
+	if not n: return
+	
 	n.pclass = pclass
 	n.pname = pname
 	n.health = health
@@ -123,6 +144,10 @@ func try_player_pos(pos: Vector2):
 	if not is_server(): return
 	
 	var sender = multiplayer.get_remote_sender_id()
+	
+	if not sender in players: return
+	if not players[sender].node: return
+	
 	var current_time = Time.get_ticks_msec()
 	var last_sent_time = players[sender].last_updated_pos
 	
@@ -151,6 +176,8 @@ func player_pos(id: int, pos: Vector2, fix: bool):
 @rpc("authority", "call_local", "reliable")
 func spawn_player(id: int, party_id: int):
 	
+	if id() == 1:
+		pass
 	players[id] = {
 		"session_id": "", # only known by the server
 		"profile_id": "",
@@ -253,3 +280,39 @@ func my_party() -> Party:
 
 func im_party_leader():
 	return my_party().is_leader(id())
+
+@rpc("any_peer", "call_remote", "reliable")
+func queue_party():
+	if not is_server(): return
+	
+	var sender: int = multiplayer.get_remote_sender_id()
+	var party: Party = parties[player_party_id(sender)]
+	
+	if not party.is_leader(sender): return
+	
+	var resp = await (Networking.http
+		.http_get("/browser/game")
+		.send())
+	
+	if resp.status() != 200: 
+		print("could not find any servers")
+		return
+	
+	var json = await resp.json()
+	var server = json["data"]
+	
+	for pid in party.members:
+		game_ready.rpc_id(pid, server.ip, server.port)
+
+func disconnect_peer() -> void:
+	multiplayer.multiplayer_peer = null
+
+@rpc("authority", "call_remote", "reliable")
+func game_ready(ip: String, port: int):
+	players[id()].node.queue_free()
+	disconnect_peer()
+	get_tree().change_scene_to_file("res://levels/dungeon/dungeon.tscn")
+	
+	Client.connect_to_server(ip, port)
+	players = {}
+	parties = {}

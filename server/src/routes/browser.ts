@@ -7,18 +7,34 @@ const app = new Hono();
 const ServerInput = z.object({
 	ip: z.string(),
 	port: z.number(),
-	name: z.string()
+	name: z.string(),
+	is_hub: z.boolean()
 });
 
-const Server = ServerInput.extend({ last_ping: z.coerce.date() });
+const Server = ServerInput.extend({ 
+	last_ping: z.coerce.date(),
+	in_use: z.boolean().default(false),
+});
 
 type Server = z.infer<typeof Server>;
 const servers = new Map<string, Server>();
 
-app.get('/', (c) => {
-	const rows = Array.from(servers.values())
+app.get('/hub', (c) => {
+	const rows = Array.from(servers.values()).filter((s) => s.is_hub);
 	return c.json({ data: rows });
 })
+
+app.get('/game', (c) => {
+
+	for (const [name, server] of servers) {
+		if (!server.is_hub && !server.in_use) {
+			// server.in_use = true;
+			return c.json({ data: server});
+		}
+	}
+
+	return c.body(null, 404);
+}); 
 
 app.post('/',
 	zValidator(
@@ -28,6 +44,7 @@ app.post('/',
 	(c) => {
 		const v = c.req.valid('json');
 
+		console.log(servers);
 		if (servers.has(v.name)) {
 			servers.get(v.name)!.last_ping = new Date();
 			console.log("Received ping from server: " + v.name);
@@ -38,11 +55,14 @@ app.post('/',
 			ip: v.ip,
 			port: v.port,
 			name: v.name,
+			is_hub: v.is_hub,
 			last_ping: new Date(),
+			in_use: false,
 		}
 
 		console.log("Adding server: " + v.name);
 		servers.set(v.name, server);
+
 		return c.body(null, 201);
 	}
 )

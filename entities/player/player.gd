@@ -30,4 +30,4 @@ func _physics_process(delta: float) -> void:
 		var direction: Vector2 = Input.get_vector("move_left", "move_right", "move_up", "move_down").normalized()
 		velocity = direction * speed * delta
 		move_and_slide()
-		Networking.try_player_pos.rpc_id(0, global_position)
+		Networking.try_player_pos.rpc_id(1, global_position)

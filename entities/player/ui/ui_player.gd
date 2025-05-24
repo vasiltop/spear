@@ -9,8 +9,8 @@ var id: int = 0
 
 func _ready() -> void:
 	invite.pressed.connect(func(): Networking.invite.rpc_id(id))
-	kick.pressed.connect(func(): Networking.kick.rpc_id(0, id))
-	leave.pressed.connect(func(): Networking.leave.rpc_id(0))
+	kick.pressed.connect(func(): Networking.kick.rpc_id(1, id))
+	leave.pressed.connect(func(): Networking.leave.rpc_id(1))
 	
 	invite.visible = not Networking.my_party().has(id)
 	kick.visible = (not invite.visible) and Networking.im_party_leader()
@@ -25,4 +25,6 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	if id == 0: return
+	if id not in Networking.players: return
+	
 	name_label.text = Networking.players[id].node.pname

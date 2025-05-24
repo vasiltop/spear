@@ -45,12 +45,16 @@ func _process(delta: float) -> void:
 	if timer >= BROWSER_PING_TIME:
 		timer = 0
 		ping_server_browser()
-		
+
+func is_hub() -> bool:
+	return type == ServerType.HUB	
+
 func ping_server_browser():
 	await (Networking.http
 		.http_post("/browser")
 		.json({
 			"ip": address,
 			"port": port,
-			"name": sname
+			"name": sname,
+			"is_hub": is_hub(),
 		}).send())

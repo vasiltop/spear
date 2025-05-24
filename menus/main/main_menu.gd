@@ -105,7 +105,7 @@ func create_class_selector(n, c, id):
 func request_servers():
 	server_selector.clear()
 	var resp = await (Networking.http
-		.http_get("/browser")
+		.http_get("/browser/hub")
 		.send())
 	
 	if resp.status() != 200: return

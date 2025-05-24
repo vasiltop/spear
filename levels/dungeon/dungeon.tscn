@@ -1,3 +1,11 @@
-[gd_scene format=3 uid="uid://ceejml483is2"]
+[gd_scene load_steps=2 format=3 uid="uid://ceejml483is2"]
+
+[ext_resource type="Script" uid="uid://cxrjih1mtnfnr" path="res://levels/dungeon/dungeon.gd" id="1_b571b"]
 
 [node name="Dungeon" type="Node2D"]
+script = ExtResource("1_b571b")
+
+[node name="Players" type="Node" parent="."]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(1.75, 1.75)
