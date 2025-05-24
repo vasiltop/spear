@@ -49,6 +49,7 @@ metadata/_tab_index = 0
 
 [node name="MyParty" type="VSplitContainer" parent="UI/TabBar/Party"]
 layout_mode = 2
+dragging_enabled = false
 dragger_visibility = 2
 
 [node name="Title" type="Label" parent="UI/TabBar/Party/MyParty"]
@@ -64,6 +65,7 @@ theme_override_constants/separation = 10
 
 [node name="AllPlayers" type="VSplitContainer" parent="UI/TabBar/Party"]
 layout_mode = 2
+dragging_enabled = false
 dragger_visibility = 2
 
 [node name="Title" type="Label" parent="UI/TabBar/Party/AllPlayers"]

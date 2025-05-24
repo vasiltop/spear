@@ -4,6 +4,7 @@ signal player_connected(pid: int)
 signal on_chat(pid: int, message: String)
 signal invite_from(pid: int)
 signal party_updated(party_id: int)
+signal players_modified
 
 const API_URL: String = "http://localhost:3000"
 const SESSION_ID_FILE: String = "user://session.dat"
@@ -60,6 +61,9 @@ class Party:
 		
 	func size() -> int:
 		return len(self.members)
+	
+	func is_leader(pid: int) -> bool:
+		return leader == pid
 
 var parties: Dictionary = {
 	# id -> Party
@@ -159,6 +163,7 @@ func spawn_player(id: int, party_id: int):
 	parties[party_id] = Party.new(id)
 	
 	player_connected.emit(id)
+	players_modified.emit()
 
 @rpc("any_peer", "call_local", "reliable")
 func chat(message: String):
@@ -195,8 +200,41 @@ func join_party(party_id: int, pid: int):
 		
 	party.add(pid)
 	players[pid].party_id = party_id
-	party_updated.emit(party_id)
+	players_modified.emit()
+
+@rpc("any_peer", "call_local", "reliable")
+func leave():
+	if not is_server(): return
 	
+	var sender: int = multiplayer.get_remote_sender_id()
+	player_left.rpc(sender, next_party_id())
+	
+@rpc("authority", "call_local", "reliable")
+func player_left(pid: int, new_party_id: int):
+	print("Player %d left" % pid)
+	var party_id: int = player_party_id(pid)
+	var party: Party = parties[party_id]
+	
+	if party.size() == 1:
+		parties.erase(party_id)
+	else:
+		party.remove(pid)
+		
+	players[pid].party_id = new_party_id
+	parties[new_party_id] = Party.new(pid)
+	players_modified.emit()
+	
+@rpc("any_peer", "call_remote", "reliable")
+func kick(pid: int):
+	if not is_server(): return
+	
+	var sender: int = multiplayer.get_remote_sender_id()
+	var party_id: int = player_party_id(sender)
+	var party: Party = parties[party_id]
+	
+	if party.has(pid) and party.is_leader(sender):
+		player_left.rpc(sender, next_party_id())
+
 func player_name(pid: int):
 	return players[pid].node.pname
 
@@ -212,3 +250,6 @@ func my_party_id() -> int:
 
 func my_party() -> Party:
 	return parties[my_party_id()]
+
+func im_party_leader():
+	return my_party().is_leader(id())

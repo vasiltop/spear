@@ -16,3 +16,7 @@ text = "Invite"
 [node name="Kick" type="Button" parent="."]
 layout_mode = 2
 text = "Kick"
+
+[node name="Leave" type="Button" parent="."]
+layout_mode = 2
+text = "Leave"

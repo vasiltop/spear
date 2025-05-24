@@ -9,8 +9,8 @@ const UI_PLAYER = preload("res://entities/player/ui/ui_player.tscn")
 func _ready() -> void:
 	if not player.is_self(): return
 	
-	Networking.party_updated.connect(func(id: int): reset())
-	Networking.player_connected.connect(func(id: int): reset())
+	Networking.players_modified.connect(reset)
+	
 	reset()
 		
 func reset():
