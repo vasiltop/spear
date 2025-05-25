@@ -4,6 +4,7 @@ extends CharacterBody2D
 @onready var tab_bar: TabContainer = $UI/TabBar
 @onready var chat: VSplitContainer = $UI/Chat
 @onready var camera: Camera2D = $Camera
+@onready var sprite: Sprite2D = $Sprite2D
 
 @export var speed: float
 @export var cam_speed: float
@@ -30,6 +31,21 @@ func is_self() -> bool:
 func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("toggle_ui"):
 		tab_bar.visible = !tab_bar.visible
+	
+	var camera_zoom_speed: float = 1
+	var camera_max_zoom: float = 18.0
+	var camera_min_zoom: float = 4
+	
+	var side: int = -1 if Input.is_action_just_pressed("zoom_out") else 1
+	if Input.is_action_just_pressed("zoom_in") || Input.is_action_just_pressed("zoom_out"):
+		camera.zoom.x += camera_zoom_speed * side
+		camera.zoom.x = clamp(camera.zoom.x, camera_min_zoom, camera_max_zoom)
+		camera.zoom.y = camera.zoom.x
+		
+	if Input.is_action_just_pressed("attack"):
+		var pos = get_global_mouse_position()
+		global_position = pos
+		Networking.try_player_pos.rpc_id(1, global_position)
 		
 func _physics_process(delta: float) -> void:
 		if chat.is_chatting(): return
@@ -40,3 +56,5 @@ func _physics_process(delta: float) -> void:
 		Networking.try_player_pos.rpc_id(1, global_position)
 		
 		camera.global_position += (global_position - camera.global_position) * cam_speed
+
+		sprite.flip_h = true if sign(global_position.x - get_global_mouse_position().x) > 0 else false
