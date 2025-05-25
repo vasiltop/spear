@@ -18,6 +18,7 @@ func invite_from(pid: int):
 func on_chat(pid: int, message: String):
 	var pname = Networking.player_name(pid)
 	var label = Label.new()
+	#label.add_theme_font_override("font", load("res://assets/m3x6.ttf"))
 	label.text = "%s: %s" % [pname, message]
 	messages_container.add_child(label)
 
