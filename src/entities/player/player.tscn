@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=3 uid="uid://b2pvm70c0kima"]
+
+[ext_resource type="Texture2D" uid="uid://c03q0rdqivb2x" path="res://src/entities/player/player.png" id="1_4m8ck"]
+[ext_resource type="Script" uid="uid://dy0kyhyorhv1r" path="res://src/entities/player/player.gd" id="1_vt6n5"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4m8ck"]
+size = Vector2(5, 16)
+
+[node name="Player" type="CharacterBody2D"]
+script = ExtResource("1_vt6n5")
+
+[node name="Camera" type="Camera2D" parent="."]
+top_level = true
+zoom = Vector2(2.5, 2.5)
+
+[node name="Sprite" type="Sprite2D" parent="."]
+texture = ExtResource("1_4m8ck")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(-0.5, 0)
+shape = SubResource("RectangleShape2D_4m8ck")
+
+[node name="Weapon" type="Sprite2D" parent="."]

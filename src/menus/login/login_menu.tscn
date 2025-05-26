@@ -1,0 +1,39 @@
+[gd_scene load_steps=3 format=3 uid="uid://noxjjv46jjbf"]
+
+[ext_resource type="Theme" uid="uid://b2ouhgeayxrka" path="res://theme.tres" id="1_5m7mv"]
+[ext_resource type="Script" uid="uid://mv858wg037mh" path="res://src/menus/login/login_menu.gd" id="2_8rvbv"]
+
+[node name="LoginMenu" type="CenterContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_5m7mv")
+script = ExtResource("2_8rvbv")
+
+[node name="Content" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "Login"
+horizontal_alignment = 1
+
+[node name="Username" type="LineEdit" parent="Content"]
+layout_mode = 2
+placeholder_text = "username"
+
+[node name="Password" type="LineEdit" parent="Content"]
+layout_mode = 2
+placeholder_text = "password"
+secret = true
+
+[node name="Login" type="Button" parent="Content"]
+layout_mode = 2
+text = "Login"
+
+[node name="Switch" type="Button" parent="Content"]
+layout_mode = 2
+text = "Already have an account?"

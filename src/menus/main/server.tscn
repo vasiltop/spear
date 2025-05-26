@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=3 uid="uid://psdy0k0xckbl"]
+
+[ext_resource type="Theme" uid="uid://b2ouhgeayxrka" path="res://theme.tres" id="1_7wafx"]
+[ext_resource type="Script" uid="uid://1hw2ja3hv4gk" path="res://src/menus/main/server.gd" id="2_sjs0p"]
+
+[node name="Server" type="HBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_7wafx")
+alignment = 1
+script = ExtResource("2_sjs0p")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Server Name"
+
+[node name="Button" type="Button" parent="."]
+layout_mode = 2
+theme_override_font_sizes/font_size = 31
+text = "Join"

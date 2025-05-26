@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://b1cwlullwe58b"]
+
+[ext_resource type="Script" uid="uid://bxey8bqbppadu" path="res://src/levels/game/game.gd" id="1_imxod"]
+
+[node name="Game" type="Node2D"]
+script = ExtResource("1_imxod")
+
+[node name="Players" type="Node" parent="."]

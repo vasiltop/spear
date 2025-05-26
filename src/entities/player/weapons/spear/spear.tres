@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="Weapon" load_steps=3 format=3 uid="uid://btlt0q7snb72u"]
+
+[ext_resource type="Script" uid="uid://cuy7gnjwpggab" path="res://src/entities/player/weapons/weapon.gd" id="1_gjbtu"]
+[ext_resource type="Texture2D" uid="uid://c5pueywmm23dg" path="res://src/entities/player/weapons/spear/spear.png" id="2_wcn6e"]
+
+[resource]
+script = ExtResource("1_gjbtu")
+name = "Spear"
+damage = 50
+type = 0
+texture = ExtResource("2_wcn6e")
+metadata/_custom_type_script = "uid://cuy7gnjwpggab"
