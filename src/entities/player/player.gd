@@ -22,6 +22,35 @@ func init(game: Game, id: int) -> void:
 	set_weapon(load("res://src/entities/player/weapons/spear/spear.tres") as Weapon)
 	if is_self(): camera.make_current()
 
+func set_game(game: Game) -> void:
+	self._game = game
+
+func to_dict() -> Dictionary:
+	var w: Variant = null if not _equipped_weapon else _equipped_weapon.to_dict()
+	
+	return {
+		"global_position": global_position,
+		"sprite_flip_h": sprite.flip_h,
+		"weapon": w,
+		"id": id,
+		"name": name,
+	}
+	
+func from_dict(data: Dictionary) -> void:
+	global_position = data.global_position
+	sprite.flip_h = data.sprite_flip_h
+	
+	if data.weapon:
+		set_weapon(Weapon.from_dict(data.weapon as Dictionary))
+	else:
+		set_weapon(null)
+	
+	id = data.id
+	name = data.name
+	set_physics_process(is_self())
+	set_process(is_self())
+	if is_self(): camera.make_current()
+
 func set_weapon(weapon: Weapon) -> void:
 	_equipped_weapon = weapon
 	
@@ -33,7 +62,7 @@ func set_weapon(weapon: Weapon) -> void:
 func is_self() -> bool:
 	return multiplayer.get_unique_id() == self.id
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("attack") and _equipped_weapon:
 		var dir := global_position.direction_to(get_global_mouse_position())
 		_try_attack.rpc_id(1, dir)
@@ -60,10 +89,6 @@ func _physics_process(delta: float) -> void:
 	var sprite_flip_h: bool = sign(global_position.x - get_global_mouse_position().x) > 0
 	if sprite_flip_h != sprite.flip_h : _set_sprite_flip_h.rpc(sprite_flip_h)
 	_sync_look.rpc(get_global_mouse_position())
-	
-	var col := get_last_slide_collision()
-	if col:
-		print(col.get_collider() is InteractableWeapon)
 
 @rpc("any_peer", "call_local", "unreliable")
 func _sync_look(mouse_pos: Vector2) -> void:

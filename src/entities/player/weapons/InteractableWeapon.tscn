@@ -6,7 +6,7 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_6twnc"]
 size = Vector2(20, 5)
 
-[node name="InteractableWeapon" type="CharacterBody2D"]
+[node name="InteractableWeapon" type="CharacterBody2D" groups=["persistent"]]
 collision_layer = 0
 collision_mask = 0
 script = ExtResource("1_4oeh5")

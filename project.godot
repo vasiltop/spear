@@ -28,6 +28,10 @@ gdscript/warnings/unsafe_method_access=2
 gdscript/warnings/unsafe_call_argument=2
 gdscript/warnings/unsafe_void_return=2
 
+[global_group]
+
+persistent=""
+
 [input]
 
 up={

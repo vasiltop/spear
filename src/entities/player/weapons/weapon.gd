@@ -15,3 +15,14 @@ func _init(name := "Weapon", damage := 100, type := WeaponType.PROJECTILE, textu
 	self.damage = damage
 	self.type = type
 	self.texture = texture
+
+func to_dict() -> Dictionary:
+	return {
+		"name": self.name,
+		"damage": self.damage,
+		"type": self.type,
+		"texture_path": self.texture.resource_path
+	}
+	
+static func from_dict(data: Dictionary) -> Weapon:
+	return Weapon.new(data.name as String, data.damage as int, data.type as WeaponType, load(data.texture_path as String) as Texture2D)

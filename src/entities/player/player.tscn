@@ -6,7 +6,7 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4m8ck"]
 size = Vector2(5, 16)
 
-[node name="Player" type="CharacterBody2D"]
+[node name="Player" type="CharacterBody2D" groups=["persistent"]]
 script = ExtResource("1_vt6n5")
 
 [node name="Camera" type="Camera2D" parent="."]

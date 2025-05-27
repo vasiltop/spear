@@ -58,7 +58,3 @@ func create_client(address: String, port: int) -> void:
 	var peer := ENetMultiplayerPeer.new()
 	peer.create_client(address, port)
 	multiplayer.multiplayer_peer = peer
-
-@rpc("any_peer", "call_local", "reliable")
-func test() -> void:
-	print("%d received by %d" % [multiplayer.get_remote_sender_id(), multiplayer.get_unique_id()])
