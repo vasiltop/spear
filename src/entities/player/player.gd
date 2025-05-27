@@ -11,6 +11,7 @@ var id: int
 var _game: Game
 var _last_updated_pos: int
 var _equipped_weapon: Weapon
+var _health: int = 100
 
 func init(game: Game, id: int) -> void:
 	self.id = id
@@ -34,11 +35,13 @@ func to_dict() -> Dictionary:
 		"weapon": w,
 		"id": id,
 		"name": name,
+		"health": _health,
 	}
 	
 func from_dict(data: Dictionary) -> void:
 	global_position = data.global_position
 	sprite.flip_h = data.sprite_flip_h
+	_health = data.health
 	
 	if data.weapon:
 		set_weapon(Weapon.from_dict(data.weapon as Dictionary))
@@ -62,6 +65,9 @@ func set_weapon(weapon: Weapon) -> void:
 func is_self() -> bool:
 	return multiplayer.get_unique_id() == self.id
 
+func has_weapon() -> bool:
+	return _equipped_weapon != null
+
 func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("attack") and _equipped_weapon:
 		var dir := global_position.direction_to(get_global_mouse_position())
@@ -71,11 +77,11 @@ func _process(_delta: float) -> void:
 func _try_attack(dir: Vector2) -> void:
 	if not multiplayer.is_server(): return
 	var id := Networking.next_object_id()
-	_attack.rpc(id, dir)
+	_attack.rpc(multiplayer.get_remote_sender_id(), id, dir)
 	
 @rpc("authority", "call_local", "reliable")
-func _attack(id: int, dir: Vector2) -> void:
-	InteractableWeapon.throw(id, _game, _equipped_weapon, dir, 400, global_position)
+func _attack(attacker: int, id: int, dir: Vector2) -> void:
+	InteractableWeapon.throw(attacker, id, _game, _equipped_weapon, dir, 400, global_position)
 	set_weapon(null)
 
 func _physics_process(delta: float) -> void:
@@ -124,3 +130,17 @@ func _try_player_pos(pos: Vector2) -> void:
 func player_pos(pos: Vector2, fix: bool) -> void:
 	if not fix and self.id == multiplayer.get_unique_id(): return
 	self.global_position = pos
+
+func damage(amount: int) -> void:
+	_health -= amount
+	
+	if _health <= 0:
+		kill.rpc()
+		
+@rpc("authority", "call_local", "reliable")
+func kill() -> void:
+	queue_free()
+	
+	if multiplayer.is_server():
+		_game.test(id)
+		

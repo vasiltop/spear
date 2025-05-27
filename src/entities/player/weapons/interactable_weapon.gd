@@ -8,8 +8,9 @@ const FRICTION := 0.95
 var _weapon: Weapon
 var _throw_direction: Vector2
 var _game: Game
+var _thrower: int
 
-static func throw(id: int, game: Game, weapon: Weapon, throw_direction: Vector2, vel: int, pos: Vector2) -> void:
+static func throw(thrower: int, id: int, game: Game, weapon: Weapon, throw_direction: Vector2, vel: int, pos: Vector2) -> void:
 	var inst: InteractableWeapon = preload("res://src/entities/player/weapons/InteractableWeapon.tscn").instantiate()
 	game.add_child(inst)
 	
@@ -21,6 +22,7 @@ static func throw(id: int, game: Game, weapon: Weapon, throw_direction: Vector2,
 	inst.sprite.texture = weapon.texture
 	inst.sprite.look_at(pos + throw_direction)
 	inst.name = "InteractableWeapon" + str(id)
+	inst._thrower = thrower
 
 func set_game(game: Game) -> void:
 	self._game = game
@@ -31,7 +33,6 @@ func pickup() -> Weapon:
 
 func _physics_process(_delta: float) -> void:
 	velocity *= FRICTION
-
 	if velocity.length() < 1: velocity = Vector2.ZERO
 	move_and_slide()
 	
@@ -43,12 +44,27 @@ func _process(_delta: float) -> void:
 			var player := body as Player
 			if player.is_self() and Input.is_action_just_pressed("interact"):
 				_try_pick_up.rpc_id(1)
+				
+	if not multiplayer.is_server(): return
+	
+	for body in bodies:
+		if body is Player and velocity.length() > 25:
+			var player := body as Player
+			if player.id != _thrower:
+				player.damage(_weapon.damage)
+				_stop_movement.rpc()
+			
+@rpc("authority", "call_local", "reliable")
+func _stop_movement() -> void:
+	velocity = Vector2.ZERO
 
 @rpc("any_peer", "call_remote", "reliable")
 func _try_pick_up() -> void:
+	var player := _game.get_player(sender)
+	if player.has_weapon(): return
+	
 	var sender := multiplayer.get_remote_sender_id()
 	var bodies := area.get_overlapping_bodies()
-	
 	var valid := false
 	
 	for body in bodies:

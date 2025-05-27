@@ -27,6 +27,16 @@ func _peer_connected(id: int) -> void:
 		if peer_id == id: continue
 		_init_node.rpc_id(peer_id, inst.scene_file_path, inst.call("to_dict"))
 
+func test(id: int) -> void:
+	print("waiting")
+	await get_tree().create_timer(3.0).timeout
+	
+	var inst: Player = PlayerScene.instantiate()
+	add_child(inst)
+	inst.init(self, id)
+	_init_node.rpc(inst.scene_file_path, inst.call("to_dict"))
+	print("spawned")
+
 @rpc("authority", "call_remote", "reliable")
 func _init_node(scene_path: String, data: Dictionary) -> void:
 	var node := (load(scene_path) as PackedScene).instantiate()
