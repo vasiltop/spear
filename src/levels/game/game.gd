@@ -34,7 +34,6 @@ func _peer_disconnected(id: int) -> void:
 
 func _process(delta: float) -> void:
 	if not multiplayer.is_server(): return
-	print("Freeze time: %d, timer: %f" % [int(_is_freeze_time), _freeze_timer])
 	var player_count := multiplayer.get_peers().size()
 
 	if player_count < 2 and not _waiting_for_players:
@@ -89,6 +88,7 @@ func _spawn_player(id: int) -> Player:
 	var inst: Player = PlayerScene.instantiate()
 	add_child(inst)
 	inst.init(self, id)
+	inst.global_position = _current_map.get_next_spawn()
 	
 	for peer_id in multiplayer.get_peers():
 		_init_node.rpc_id(peer_id, inst.scene_file_path, inst.call("to_dict"))
