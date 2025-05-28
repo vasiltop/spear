@@ -1,0 +1,25 @@
+[gd_scene load_steps=2 format=3 uid="uid://cr0hvfkf8nwcx"]
+
+[ext_resource type="Script" uid="uid://dblqgjmiq4lx1" path="res://src/levels/map.gd" id="1_mr6bq"]
+
+[node name="Test" type="Node2D"]
+script = ExtResource("1_mr6bq")
+
+[node name="Spawns" type="Node" parent="."]
+
+[node name="Node2D" type="Node2D" parent="Spawns"]
+position = Vector2(50, 0)
+
+[node name="Node2D2" type="Node2D" parent="Spawns"]
+position = Vector2(-53, 0)
+
+[node name="Node2D3" type="Node2D" parent="Spawns"]
+position = Vector2(0, -44)
+
+[node name="Node2D4" type="Node2D" parent="Spawns"]
+position = Vector2(0, 36)
+
+[node name="Label" type="Label" parent="."]
+offset_right = 69.0
+offset_bottom = 23.0
+text = "test map"

@@ -60,10 +60,11 @@ func _stop_movement() -> void:
 
 @rpc("any_peer", "call_remote", "reliable")
 func _try_pick_up() -> void:
+	var sender := multiplayer.get_remote_sender_id()
+	
 	var player := _game.get_player(sender)
 	if player.has_weapon(): return
 	
-	var sender := multiplayer.get_remote_sender_id()
 	var bodies := area.get_overlapping_bodies()
 	var valid := false
 	

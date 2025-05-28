@@ -69,6 +69,8 @@ func has_weapon() -> bool:
 	return _equipped_weapon != null
 
 func _process(_delta: float) -> void:
+	if _game.is_freeze_time(): return
+	
 	if Input.is_action_just_pressed("attack") and _equipped_weapon:
 		var dir := global_position.direction_to(get_global_mouse_position())
 		_try_attack.rpc_id(1, dir)
@@ -85,6 +87,8 @@ func _attack(attacker: int, id: int, dir: Vector2) -> void:
 	set_weapon(null)
 
 func _physics_process(delta: float) -> void:
+	if _game.is_freeze_time(): return
+	
 	var direction: Vector2 = Input.get_vector("left", "right", "up", "down").normalized()
 	velocity = direction * SPEED * delta
 	move_and_slide()
@@ -140,7 +144,3 @@ func damage(amount: int) -> void:
 @rpc("authority", "call_local", "reliable")
 func kill() -> void:
 	queue_free()
-	
-	if multiplayer.is_server():
-		_game.test(id)
-		
