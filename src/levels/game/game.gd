@@ -2,6 +2,7 @@ class_name Game extends Node2D
 
 const PlayerScene = preload("res://src/entities/player/player.tscn")
 const FREEZE_TIME_DURATION := 2
+const END_TIME_DURATION := 2
 const _maps := [
 	"res://src/levels/test/test.tscn",
 ]
@@ -10,6 +11,7 @@ var _freeze_timer: float
 var _is_freeze_time := true
 var _current_map: Map
 var _waiting_for_players: bool = true
+var _end_timer: float
 
 func _ready() -> void:
 	multiplayer.peer_connected.connect(_peer_connected)
@@ -48,12 +50,15 @@ func _process(delta: float) -> void:
 				_update_freeze_time.rpc(false)
 				_freeze_timer = 0
 		
-		if _player_alive_count() <= 1:
+		if _player_alive_count() <= 1 and _end_timer >= END_TIME_DURATION:
+			_end_timer = 0
 			_update_freeze_time.rpc(true)
 			_destroy_all_persistent.rpc()
 			
 			for id in multiplayer.get_peers():
 				_spawn_player(id)
+		elif _player_alive_count() <= 1:
+			_end_timer += delta
 
 @rpc("authority", "call_local", "reliable")
 func _kill_all_players() -> void:
