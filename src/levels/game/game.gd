@@ -16,6 +16,7 @@ var _is_freeze_time := true
 var _current_map: Map
 var _waiting_for_players: bool = true
 var _end_timer: float
+var _current_spec_player_index: int
 
 func _ready() -> void:
 	multiplayer.peer_connected.connect(_peer_connected)
@@ -47,7 +48,26 @@ func load_map(path: String) -> void:
 func _peer_disconnected(id: int) -> void:
 	get_player(id).queue_free()
 
+func _change_spec(value: int) -> void:
+	var temp := _current_spec_player_index + value
+	var max_index := _player_alive_count() - 1
+
+	if temp > max_index: _current_spec_player_index = 0
+	elif temp < 0: _current_spec_player_index = max_index
+	else: _current_spec_player_index = temp
+
 func _process(delta: float) -> void:
+	if not im_alive() and _get_players().size():
+		if _current_spec_player_index >= _get_players().size() or _current_spec_player_index < 0:
+			_change_spec(1)
+		
+		_get_players()[_current_spec_player_index].camera.make_current()
+		
+		if Input.is_action_just_pressed("spec_next"):
+			_change_spec(1)
+		elif Input.is_action_just_pressed("spec_prev"):
+			_change_spec(-1)
+
 	if not multiplayer.is_server(): return
 	var player_count := multiplayer.get_peers().size()
 
@@ -76,6 +96,7 @@ func _process(delta: float) -> void:
 			
 			for id in multiplayer.get_peers():
 				_spawn_player(id)
+				
 		elif _player_alive_count() <= 1:
 			_end_timer += delta
 			
@@ -158,12 +179,12 @@ func get_player(id: int) -> Player:
 	return null
 
 @rpc("authority", "call_local", "reliable")
-func add_to_killfeed(id_killed: int, weapon_name: String) -> void:
+func add_to_killfeed(id_killed: int, id_killer: int, weapon_name: String) -> void:
 	if killfeed.get_child_count() >= MAX_KILLFEED_SIZE:
 		killfeed.get_child(0).queue_free()
 		
 	var label := Label.new()
-	label.text = "%d was killed by a %s" % [id_killed, weapon_name]
+	label.text = "%d was killed by %d using a %s" % [id_killed, id_killer, weapon_name]
 	label.add_theme_font_size_override("font_size", 21)
 	killfeed.add_child(label)
 
@@ -171,3 +192,6 @@ func add_to_killfeed(id_killed: int, weapon_name: String) -> void:
 func _clear_killfeed() -> void:
 	for node in killfeed.get_children():
 		node.queue_free()
+
+func im_alive() -> bool:
+	return get_player(multiplayer.get_unique_id()) != null

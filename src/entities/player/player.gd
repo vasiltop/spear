@@ -50,8 +50,6 @@ func from_dict(data: Dictionary) -> void:
 	
 	id = data.id
 	name = data.name
-	set_physics_process(is_self())
-	set_process(is_self())
 	if is_self(): camera.make_current()
 
 func set_weapon(weapon: Weapon) -> void:
@@ -69,6 +67,7 @@ func has_weapon() -> bool:
 	return _equipped_weapon != null
 
 func _process(_delta: float) -> void:
+	if not is_self(): return
 	if _game.is_freeze_time(): return
 	
 	if Input.is_action_just_pressed("attack") and _equipped_weapon:
@@ -89,6 +88,7 @@ func _attack(attacker: int, id: int, dir: Vector2) -> void:
 func _physics_process(delta: float) -> void:
 	camera.global_position += (global_position - camera.global_position) * CAM_SPEED
 	
+	if not is_self(): return
 	if _game.is_freeze_time(): return
 	
 	var direction: Vector2 = Input.get_vector("left", "right", "up", "down").normalized()
@@ -135,11 +135,11 @@ func player_pos(pos: Vector2, fix: bool) -> void:
 	if not fix and self.id == multiplayer.get_unique_id(): return
 	self.global_position = pos
 
-func damage(weapon: Weapon) -> void:
+func damage(thrower: int, weapon: Weapon) -> void:
 	_health -= weapon.damage
 	
 	if _health <= 0:
-		_game.add_to_killfeed.rpc(id, weapon.name)
+		_game.add_to_killfeed.rpc(id, thrower, weapon.name)
 		kill.rpc()
 		
 @rpc("authority", "call_local", "reliable")

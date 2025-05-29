@@ -35,6 +35,7 @@ text = "Game Status Message!"
 horizontal_alignment = 1
 
 [node name="Killfeed" type="VBoxContainer" parent="UI/Content"]
+layout_mode = 0
 offset_left = 10.0
 offset_top = 10.0
 offset_right = 50.0
