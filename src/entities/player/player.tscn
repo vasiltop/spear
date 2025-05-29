@@ -11,7 +11,7 @@ script = ExtResource("1_vt6n5")
 
 [node name="Camera" type="Camera2D" parent="."]
 top_level = true
-zoom = Vector2(2.5, 2.5)
+zoom = Vector2(4, 4)
 
 [node name="Sprite" type="Sprite2D" parent="."]
 texture = ExtResource("1_4m8ck")
@@ -21,3 +21,5 @@ position = Vector2(-0.5, 0)
 shape = SubResource("RectangleShape2D_4m8ck")
 
 [node name="Weapon" type="Sprite2D" parent="."]
+
+[node name="Audio" type="AudioStreamPlayer2D" parent="."]

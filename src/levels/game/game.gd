@@ -5,7 +5,7 @@ const FREEZE_TIME_DURATION := 2
 const END_TIME_DURATION := 3
 const MAX_KILLFEED_SIZE := 10
 const _maps := [
-	"res://src/levels/test/test.tscn",
+	"map1",
 ]
 
 @onready var _status_message: Label = $UI/Content/StatusMessage
@@ -35,9 +35,10 @@ func _hide_status_message() -> void:
 	_status_message.hide()
 
 @rpc("authority", "call_local", "reliable")
-func load_map(path: String) -> void:
-	var inst := load(path) as PackedScene
+func load_map(map_name: String) -> void:
+	var inst := load("res://src/levels/%s/%s.tscn" % [map_name, map_name]) as PackedScene
 	var map := inst.instantiate() as Map
+	map.name = map_name
 	add_child(map)
 	
 	if _current_map:
@@ -50,14 +51,15 @@ func _peer_disconnected(id: int) -> void:
 
 func _change_spec(value: int) -> void:
 	var temp := _current_spec_player_index + value
-	var max_index := _player_alive_count() - 1
+	var max_index := _get_players().size() - 1
 
 	if temp > max_index: _current_spec_player_index = 0
 	elif temp < 0: _current_spec_player_index = max_index
 	else: _current_spec_player_index = temp
 
 func _process(delta: float) -> void:
-	if not im_alive() and _get_players().size():
+	if not im_alive() and _get_players().size() and not multiplayer.is_server():
+
 		if _current_spec_player_index >= _get_players().size() or _current_spec_player_index < 0:
 			_change_spec(1)
 		
@@ -100,7 +102,7 @@ func _process(delta: float) -> void:
 		elif _player_alive_count() <= 1:
 			_end_timer += delta
 			
-			if _get_players().size() == 1:
+			if _player_alive_count() == 1:
 				var player_name := _get_players()[0].name
 				_show_status_message.rpc("Player: " + player_name + " has won the round!")
 
@@ -115,7 +117,12 @@ func _destroy_all_persistent() -> void:
 		node.queue_free()
 
 func _player_alive_count() -> int:
-	return _get_players().size()
+	var count := 0
+	
+	for player in _get_players():
+		if not player.dead: count += 1
+		
+	return count
 
 func _get_players() -> Array[Player]:
 	var res: Array[Player] = []
@@ -157,7 +164,7 @@ func _peer_connected(id: int) -> void:
 				if player.id == id: continue
 			_init_node.rpc_id(id, node.scene_file_path, node.call("to_dict"))
 		
-	load_map.rpc_id(id, _current_map.scene_file_path)
+	load_map.rpc_id(id, _current_map.name)
 
 @rpc("authority", "call_remote", "reliable")
 func _init_node(scene_path: String, data: Dictionary) -> void:
@@ -194,4 +201,7 @@ func _clear_killfeed() -> void:
 		node.queue_free()
 
 func im_alive() -> bool:
-	return get_player(multiplayer.get_unique_id()) != null
+	var my_player := get_player(multiplayer.get_unique_id())
+	if my_player == null: return false
+	
+	return my_player.dead == false

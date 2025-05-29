@@ -6,7 +6,7 @@
 [resource]
 script = ExtResource("1_gjbtu")
 name = "Spear"
-damage = 50
+damage = 100
 type = 0
 texture = ExtResource("2_wcn6e")
 metadata/_custom_type_script = "uid://cuy7gnjwpggab"

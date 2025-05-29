@@ -6,12 +6,14 @@ class_name Player extends CharacterBody2D
 
 const SPEED := 4000
 const CAM_SPEED := 0.1
+const SpearHitSound = preload("res://sounds/spear_hit.wav")
 
 var id: int
 var _game: Game
 var _last_updated_pos: int
 var _equipped_weapon: Weapon
 var _health: int = 100
+var dead: bool = false
 
 func init(game: Game, id: int) -> void:
 	self.id = id
@@ -36,12 +38,16 @@ func to_dict() -> Dictionary:
 		"id": id,
 		"name": name,
 		"health": _health,
+		"dead": dead
 	}
 	
 func from_dict(data: Dictionary) -> void:
 	global_position = data.global_position
 	sprite.flip_h = data.sprite_flip_h
 	_health = data.health
+	dead = data.dead
+	
+	if dead: rotate(deg_to_rad(90))
 	
 	if data.weapon:
 		set_weapon(Weapon.from_dict(data.weapon as Dictionary))
@@ -69,6 +75,7 @@ func has_weapon() -> bool:
 func _process(_delta: float) -> void:
 	if not is_self(): return
 	if _game.is_freeze_time(): return
+	if dead: return
 	
 	if Input.is_action_just_pressed("attack") and _equipped_weapon:
 		var dir := global_position.direction_to(get_global_mouse_position())
@@ -90,6 +97,7 @@ func _physics_process(delta: float) -> void:
 	
 	if not is_self(): return
 	if _game.is_freeze_time(): return
+	if dead: return
 	
 	var direction: Vector2 = Input.get_vector("left", "right", "up", "down").normalized()
 	velocity = direction * SPEED * delta
@@ -134,14 +142,23 @@ func _try_player_pos(pos: Vector2) -> void:
 func player_pos(pos: Vector2, fix: bool) -> void:
 	if not fix and self.id == multiplayer.get_unique_id(): return
 	self.global_position = pos
+	
+@onready var audio: AudioStreamPlayer2D = $Audio
 
 func damage(thrower: int, weapon: Weapon) -> void:
 	_health -= weapon.damage
+	_play_hit_sound.rpc()
 	
 	if _health <= 0:
 		_game.add_to_killfeed.rpc(id, thrower, weapon.name)
 		kill.rpc()
-		
+	
+@rpc("authority", "call_local", "reliable")
+func _play_hit_sound() -> void:
+	audio.stream = SpearHitSound
+	audio.play()
+
 @rpc("authority", "call_local", "reliable")
 func kill() -> void:
-	queue_free()
+	dead = true
+	rotate(deg_to_rad(90))
