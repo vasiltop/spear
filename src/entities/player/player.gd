@@ -135,10 +135,11 @@ func player_pos(pos: Vector2, fix: bool) -> void:
 	if not fix and self.id == multiplayer.get_unique_id(): return
 	self.global_position = pos
 
-func damage(amount: int) -> void:
-	_health -= amount
+func damage(weapon: Weapon) -> void:
+	_health -= weapon.damage
 	
 	if _health <= 0:
+		_game.add_to_killfeed.rpc(id, weapon.name)
 		kill.rpc()
 		
 @rpc("authority", "call_local", "reliable")

@@ -51,7 +51,7 @@ func _process(_delta: float) -> void:
 		if body is Player and velocity.length() > 25:
 			var player := body as Player
 			if player.id != _thrower:
-				player.damage(_weapon.damage)
+				player.damage(_weapon)
 				_stop_movement.rpc()
 			
 @rpc("authority", "call_local", "reliable")

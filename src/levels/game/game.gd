@@ -3,11 +3,13 @@ class_name Game extends Node2D
 const PlayerScene = preload("res://src/entities/player/player.tscn")
 const FREEZE_TIME_DURATION := 2
 const END_TIME_DURATION := 3
+const MAX_KILLFEED_SIZE := 10
 const _maps := [
 	"res://src/levels/test/test.tscn",
 ]
 
 @onready var _status_message: Label = $UI/Content/StatusMessage
+@onready var killfeed: VBoxContainer = $UI/Content/Killfeed
 
 var _freeze_timer: float
 var _is_freeze_time := true
@@ -54,8 +56,7 @@ func _process(delta: float) -> void:
 		load_map.rpc(_maps[0])
 	elif player_count >= 2:
 		_waiting_for_players = false
-		
-		
+
 		if _is_freeze_time:
 			_show_status_message.rpc("Get Ready..")
 			_freeze_timer += delta
@@ -71,6 +72,7 @@ func _process(delta: float) -> void:
 			_update_freeze_time.rpc(true)
 			_destroy_all_persistent.rpc()
 			_show_status_message.rpc("Get Ready..")
+			_clear_killfeed.rpc()
 			
 			for id in multiplayer.get_peers():
 				_spawn_player(id)
@@ -154,3 +156,18 @@ func get_player(id: int) -> Player:
 		if player.id == id: return player
 		
 	return null
+
+@rpc("authority", "call_local", "reliable")
+func add_to_killfeed(id_killed: int, weapon_name: String) -> void:
+	if killfeed.get_child_count() >= MAX_KILLFEED_SIZE:
+		killfeed.get_child(0).queue_free()
+		
+	var label := Label.new()
+	label.text = "%d was killed by a %s" % [id_killed, weapon_name]
+	label.add_theme_font_size_override("font_size", 21)
+	killfeed.add_child(label)
+
+@rpc("authority", "call_local", "reliable")
+func _clear_killfeed() -> void:
+	for node in killfeed.get_children():
+		node.queue_free()
