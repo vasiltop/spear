@@ -87,14 +87,14 @@ func _attack(attacker: int, id: int, dir: Vector2) -> void:
 	set_weapon(null)
 
 func _physics_process(delta: float) -> void:
+	camera.global_position += (global_position - camera.global_position) * CAM_SPEED
+	
 	if _game.is_freeze_time(): return
 	
 	var direction: Vector2 = Input.get_vector("left", "right", "up", "down").normalized()
 	velocity = direction * SPEED * delta
 	move_and_slide()
 	_try_player_pos.rpc_id(1, global_position)
-	
-	camera.global_position += (global_position - camera.global_position) * CAM_SPEED
 	
 	var sprite_flip_h: bool = sign(global_position.x - get_global_mouse_position().x) > 0
 	if sprite_flip_h != sprite.flip_h : _set_sprite_flip_h.rpc(sprite_flip_h)

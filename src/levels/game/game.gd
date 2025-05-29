@@ -2,10 +2,12 @@ class_name Game extends Node2D
 
 const PlayerScene = preload("res://src/entities/player/player.tscn")
 const FREEZE_TIME_DURATION := 2
-const END_TIME_DURATION := 2
+const END_TIME_DURATION := 3
 const _maps := [
 	"res://src/levels/test/test.tscn",
 ]
+
+@onready var _status_message: Label = $UI/Content/StatusMessage
 
 var _freeze_timer: float
 var _is_freeze_time := true
@@ -19,6 +21,15 @@ func _ready() -> void:
 	
 	if multiplayer.is_server():
 		load_map.rpc(_maps[0])
+
+@rpc("authority", "call_local", "reliable")
+func _show_status_message(message: String) -> void:
+	_status_message.text = message
+	_status_message.show()
+
+@rpc("authority", "call_local", "reliable")
+func _hide_status_message() -> void:
+	_status_message.hide()
 
 @rpc("authority", "call_local", "reliable")
 func load_map(path: String) -> void:
@@ -44,21 +55,31 @@ func _process(delta: float) -> void:
 	elif player_count >= 2:
 		_waiting_for_players = false
 		
+		
 		if _is_freeze_time:
+			_show_status_message.rpc("Get Ready..")
 			_freeze_timer += delta
 			if _freeze_timer >= FREEZE_TIME_DURATION:
 				_update_freeze_time.rpc(false)
 				_freeze_timer = 0
-		
+		else:
+			_hide_status_message.rpc()
+			
 		if _player_alive_count() <= 1 and _end_timer >= END_TIME_DURATION:
+			# reset the game since the extra margin time ran out
 			_end_timer = 0
 			_update_freeze_time.rpc(true)
 			_destroy_all_persistent.rpc()
+			_show_status_message.rpc("Get Ready..")
 			
 			for id in multiplayer.get_peers():
 				_spawn_player(id)
 		elif _player_alive_count() <= 1:
 			_end_timer += delta
+			
+			if _get_players().size() == 1:
+				var player_name := _get_players()[0].name
+				_show_status_message.rpc("Player: " + player_name + " has won the round!")
 
 @rpc("authority", "call_local", "reliable")
 func _kill_all_players() -> void:
